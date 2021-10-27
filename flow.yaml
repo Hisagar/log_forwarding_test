@@ -1,0 +1,19 @@
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: Flow
+metadata:
+  name: flow-test
+  namespace: logging
+spec:
+  filters:
+    - parser:
+        remove_key_name_field: true
+        parse:
+          type: static-web-app
+    - tag_normaliser:
+        format: ${namespace_name}.${pod_name}.${container_name}
+  localOutputRefs:
+    - test-output
+  match:
+    - select:
+        labels:
+          app: static-web-app
