@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: log-generator
+  name: apache-log-generator
 spec:
   selector:
     matchLabels:
-      app: random-logger
+      app: random-apache-logger
   replicas: 2
   template:
     metadata:
       labels:
-        app: random-logger
+        app: random-apache-logger
     spec:
       containers:
-        - name: static-web-app
-          image: chentex/random-logger:latest
+        - name: apache-logger-app
+          image: reyiyo/apache-logs-generator
           ports:
             - containerPort: 80

@@ -1,0 +1,10 @@
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: Logging
+metadata:
+  name: logging-operator-test
+  namespace: sw09dev
+spec:
+  fluentd: {}
+  fluentbit: {}
+  controlNamespace: sw09dev
+  watchNamespaces: ["logtest"]

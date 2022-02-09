@@ -1,0 +1,69 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: task-create-log-forwarding
+spec:
+  serviceAccountName: task-create-log-forwarding
+  entrypoint: main
+  templates:
+    - name: main
+      steps:
+        - - name: configure-start
+            template: configure-start
+
+        - - name: configure-flow
+            template: configure-flow
+
+        - - name: configure-output
+            template: configure-output
+
+    - name: configure-start
+      retryStrategy:
+        limit: 2  # Retry up to 2 times, for 3 total attempts
+        retryPolicy: "Always"
+      resource:
+        action: patch
+        manifest: |
+          apiVersion: logging.banzaicloud.io/v1beta1
+          kind: Logging
+          metadata:
+            name: default-logging-simple
+          spec:
+            fluentd: {}
+            fluentbit: {}
+            controlNamespace: logging
+
+    - name: configure-flow
+      retryStrategy:
+        limit: 2  # Retry up to 2 times, for 3 total attempts
+        retryPolicy: "Always"
+      resource:
+        action: patch
+        manifest: |
+          apiVersion: logging.banzaicloud.io/v1beta1
+          kind: Flow
+          metadata:
+            name: test-flow
+            namespace: logging
+          spec:
+            localOutputRefs:
+              - task-logger
+
+    - name: configure-output
+      retryStrategy:
+        limit: 2  # Retry up to 2 times, for 3 total attempts
+        retryPolicy: "Always"
+      resource:
+        action: patch
+        manifest: |
+          apiVersion: logging.banzaicloud.io/v1beta1
+          kind: Output
+          metadata:
+            name: test-output
+            namespace: logging
+          spec:
+            http:
+              endpoint: https://enrczo1fb4u2xr7.m.pipedream.net
+              buffer:
+                tags: "[]"
+                flush_interval: 10s

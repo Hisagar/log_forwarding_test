@@ -1,0 +1,8 @@
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: Flow
+metadata:
+  name: logging-operator-flow
+  namespace: sw12dev
+spec:
+  localOutputRefs:
+    - log-forwarding-output-029119ff-f7d3-447d-b04d-e9208cbc13d3

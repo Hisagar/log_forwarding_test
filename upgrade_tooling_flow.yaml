@@ -1,0 +1,24 @@
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: Flow
+metadata:
+  name: logging-operator-flow
+  namespace: sw12dev
+spec:
+  filters:
+    - grep:
+        or:
+          - regexp:
+              - key: source
+                pattern: newrelic-php-agent
+  localOutputRefs:
+    - log-forward-change-next-iter
+  match:
+    - select:
+        labels:
+          app: drupal
+    - select:
+        labels:
+          fntasks.acquia.io/command-type: cronjob
+    - select:
+        labels:
+          fntasks.acquia.io/command-type: cloud-hook

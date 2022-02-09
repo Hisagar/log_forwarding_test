@@ -1,8 +1,12 @@
 apiVersion: logging.banzaicloud.io/v1beta1
 kind: Logging
 metadata:
-  name: default-logging-simple
+  name: logging
 spec:
-  fluentd: {}
+  fluentd:
+    image:
+      repository: localhost:32000/fluentd-local
+      tag: v1.14.4-alpine-2
+      pullPolicy: IfNotPresent
   fluentbit: {}
-  controlNamespace: logging
+  controlNamespace: acquia-system

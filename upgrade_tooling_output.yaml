@@ -1,0 +1,38 @@
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: Output
+metadata:
+  name: log-forwarding-output-temp
+  namespace: sw25dev
+  labels:
+    destinationUUID: 8e7c5c22-98bd-45bf-80bb-aaf4ad803588
+spec:
+  syslog:
+    host: custom-14.ngc-2.srvs.ahdev.co
+    port: 2000
+    transport: tls
+    verify_fqdn: false
+    enable_system_cert_store: true
+    trusted_ca_path:
+      mountFrom:
+        secretKeyRef:
+          name: 'destination-creds-test-tls'
+          key: ca.crt
+    client_cert_path:
+      mountFrom:
+        secretKeyRef:
+          name: 'destination-creds-test-tls'
+          key: tls.crt
+    private_key_path:
+      mountFrom:
+        secretKeyRef:
+          name: 'destination-creds-test-tls'
+          key: tls.key
+    private_key_passphrase:
+      valueFrom:
+        secretKeyRef:
+          name: 'destination-creds-test-tls'
+          key: tls_key_password
+    allow_self_signed_cert: true
+    buffer:
+      flush_interval: 10s
+      tags: '[]'

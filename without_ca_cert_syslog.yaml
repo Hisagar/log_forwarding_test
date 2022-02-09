@@ -1,0 +1,16 @@
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: Output
+metadata:
+  name: log-forward-change-next-iter
+  namespace: sw09dev
+spec:
+  syslog:
+    host: custom-14.ngc-2.srvs.ahdev.co
+    port: 1999
+    transport: tcp
+    format:
+      app_name_field: example.custom1
+      proc_id_field: example.custom2
+    buffer:
+      tags: "[]"
+      flush_interval: 10s

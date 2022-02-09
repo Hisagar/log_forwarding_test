@@ -1,0 +1,25 @@
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: Output
+metadata:
+  name: log-forwarding-output-768fc7cb-778e-475f-b659-44ac0ce133c2
+  namespace: sw16dev
+spec:
+  syslog:
+    host: custom-14.ngc-2.srvs.ahdev.co
+    port: 1999
+    transport: tls
+    trusted_ca_path:
+      mountFrom:
+        secretKeyRef:
+          name: 'destination-creds-768fc7cb-778e-475f-b659-44ac0ce133c2'
+          key: ca_cert
+    private_key_path:
+      mountFrom:
+        secretKeyRef:
+          name: 'destination-creds-768fc7cb-778e-475f-b659-44ac0ce133c2'
+          key:  private_key
+    private_key_passphrase: RemoteSyslogWeb5
+    allow_self_signed_cert: true
+    buffer:
+      flush_interval: 10s
+      tags: '[]'

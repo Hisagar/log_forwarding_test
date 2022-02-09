@@ -1,0 +1,86 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: logging-operator-main
+spec:
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: isApacheAccessLogEnabled
+        value: 'true'
+      - name: isApacheErrorLogEnabled
+        value: 'true'
+      - name: str
+        value: 'ABCD, XYZ, PQR'
+  templates:
+    - name: main
+      steps:
+        - - name: configure-start-step
+            template: configure-start
+        - - name: configure-flow-step
+            template: configure-flow
+        - - name: configure-output-step
+            template: configure-output
+
+
+    - name: configure-start
+      retryStrategy:
+        limit: 2  # Retry up to 2 times, for 3 total attempts
+        retryPolicy: "Always"
+      resource:
+        action: apply
+        manifest: |
+          apiVersion: logging.banzaicloud.io/v1beta1
+          kind: Logging
+          metadata:
+            name: default-logging-default
+          spec:
+            fluentd: {}
+            fluentbit: {}
+            controlNamespace: logging
+
+    - name: configure-flow
+      retryStrategy:
+        limit: 2  # Retry up to 2 times, for 3 total attempts
+        retryPolicy: "Always"
+      resource:
+        action: apply
+        manifest: |
+          apiVersion: logging.banzaicloud.io/v1beta1
+          kind: Flow
+          metadata:
+            name: flow-test
+            namespace: logging
+          spec:
+            filters:
+              - grep:
+                  or:
+                    - regexp:
+                        - key: stream
+                          pattern: "/{{= workflow.parameters.str contains 'ABC' ? 'drupal-requests' : 'invalid_drupal_request_pattern' }}|\
+                                   {{= workflow.parameters.str contains 'ABC' ? 'drupal-watchdog' : 'invalid_drupal_watchdog_pattern' }}|\
+                                   {{= workflow.parameters.str contains 'ABC' ? 'php-errors' : 'invalid_phpError_pattern' }}/"
+              - tag_normaliser:
+                  format: ${namespace_name}.${pod_name}.${container_name}
+            localOutputRefs:
+              - test-output
+
+
+    - name: configure-output
+      retryStrategy:
+        limit: 2  # Retry up to 2 times, for 3 total attempts
+        retryPolicy: "Always"
+      resource:
+        action: apply
+        manifest: |
+          apiVersion: logging.banzaicloud.io/v1beta1
+          kind: Output
+          metadata:
+            name: test-output
+            namespace: logging
+          spec:
+            http:
+              endpoint: https://enl3t5yquwf89gs.m.pipedream.net
+              buffer:
+                tags: "[]"
+                flush_interval: 10s
